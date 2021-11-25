@@ -2,6 +2,7 @@ library(fpp2)
 library(forecast)
 library(trend)
 library(gridExtra)
+library(readxl)
 
 #Permite saber se se trata de uma série temporal ou não
 class(UKgas)
@@ -183,6 +184,16 @@ fit2<-stlf(UKgas, t.window = 13, s.window = "periodic", robust=TRUE, method="nai
 p2<-autoplot(fit2)
 
 grid.arrange(pl, p2, nrow=2)
+
+#Previsões
+autoplot(UKgas)+autolayer(meanf(UKgas, h=11), series="Média", PI=FALSE) +  #h=11 h é a previsaõ futura 
+  autolayer(naive(UKgas, h=11), series="Naive", PI=FALSE)+
+  autolayer(snaive(UKgas, h=11), series="Naive Sazonal", PI=FALSE)+
+  ggtitle("Previsões para o consumo de gás  no Reino Unido") + 
+  xlab("Ano")+ ylab("Milhoes")+
+  guides(colour=guide_legend(title = "Previsões"))
+
+
 
 #comparar com a série original
 autoplot(UKgas)+
