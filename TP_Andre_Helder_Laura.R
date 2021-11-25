@@ -2,15 +2,11 @@ library(fpp2)
 library(forecast)
 library(trend)
 
+#Permite saber se se trata de uma série temporal ou não
+class(UKgas)
 
-#Inicialmente os dados estavam organizados em tabela
-class(Sealevel)
+#Representação gráfica da série temporal
+autoplot(UKgas)
 
-#Transformação da tabela em série temporal
-Sealevel<-ts((Sealevel), start = c(1997), frequency = 1) 
-Sealevel
-
-#representação gráfica
-autoplot(Sealevel) #não funciona
-
-head(Sealevel,10) #não funciona
+UKga
+autoplot(UKgas, xlab = "Anos", ylab = "Milhões", main = "Consumo de gás no Reino Unido") 
