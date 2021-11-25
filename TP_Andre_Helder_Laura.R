@@ -12,3 +12,5 @@ UKga
 autoplot(UKgas, xlab = "Anos", ylab = "Milhões", main = "Consumo de gás no Reino Unido") 
 
 ggAcf(UKgas, main="Correlograma", lag=12)
+
+mk.test(UKgas)
