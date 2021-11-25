@@ -19,21 +19,15 @@ ggAcf(UKgas, main="Correlograma", lag=12)
 #função para aplicar no teste Mann-Kendall com sazonalidade
 
 smk.test(UKgas)
-plot(nottem) #1º testar a sazonalidade
-autoplot(nottem) #tem sazonalidade
-class(nottem) #para sabermos se é ts
 
-
-
-
-#2º- definir as hipóteses:
-# H0: Não há tendeência
+#definir as hipóteses:
+# H0: Não há tendência
 # H1: Há tendência
 
-#3º Estatística de teste : z= 2.0919
+#3º Estatística de teste : z= 13.838
 #consideramos alfa= 0.05
-# valor p= .03654 < 0.05 , rejeita-se H0, logo há tendência
-# Como s= 224 >0 , a tendência é crescente.
+# valor p= 2.2e-16 < 0.05 , rejeita-se H0, logo há tendência
+# Como s= 1328 >0 , a tendência é crescente.
 
 
 #TESTE DE MANN-WHITNEY-PETTITT - MUDANÇA NA VARIÂNCIA
