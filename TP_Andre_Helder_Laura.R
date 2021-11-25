@@ -192,14 +192,14 @@ autoplot(UKgas)+
   autolayer(rwf(UKgas, h=11), series="Drift", PI=FALSE)
 
 #Metodo de tendência de Holt
-gascons <- window(UKgas, start=1960)
+gascons <- window(UKgas, start=1970)
 autoplot(gascons)
-fc <- holt(gascons, h=5)#alisamento exponencial com tend???ncia
+fc <- holt(gascons, h=5)#alisamento exponencial com tendência
 summary(fc)
 fc$fitted
 
 #Exemplo método de Holt amortecido damped
-fc3 <- holt(gascons, damped=TRUE, h=35) #sem definir phi, é estimado
+fc3 <- holt(gascons, damped=TRUE, h=5) #sem definir phi, é estimado
 summary(fc3)
 autoplot(gascons) +
   autolayer(fc, series="Método de Holt", PI=FALSE) +
