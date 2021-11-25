@@ -201,3 +201,20 @@ autoplot(UKgas)+
   autolayer(naive(UKgas, h=11), series="Naive", PI=FALSE)+
   autolayer(snaive(UKgas, h=11), series="Naive Sazonal", PI=FALSE)+
   autolayer(rwf(UKgas, h=11), series="Drift", PI=FALSE)
+
+#Metodo de tendência de Holt
+gascons <- window(UKgas, start=1960)
+autoplot(gascons)
+fc <- holt(gascons, h=5)#alisamento exponencial com tend???ncia
+summary(fc)
+fc$fitted
+
+#Exemplo método de Holt amortecido damped
+fc3 <- holt(gascons, damped=TRUE, h=35) #sem definir phi, é estimado
+summary(fc3)
+autoplot(gascons) +
+  autolayer(fc, series="Método de Holt", PI=FALSE) +
+  autolayer(fc3, series="Método de Holt amortecido", PI=FALSE) +
+  ggtitle("Previsões") + xlab("Anos") +
+  ylab("Gás consumido no reino unido") +
+  guides(colour=guide_legend(title="Previsões"))
