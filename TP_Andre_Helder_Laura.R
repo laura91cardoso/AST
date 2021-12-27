@@ -3,6 +3,7 @@ library(forecast)
 library(trend)
 library(gridExtra)
 library(readxl)
+library(ggplot2)
 
 #Permite saber se se trata de uma série temporal ou não
 class(UKgas)
@@ -218,3 +219,26 @@ autoplot(gascons) +
   ggtitle("Previsões") + xlab("Anos") +
   ylab("Gás consumido no reino unido") +
   guides(colour=guide_legend(title="Previsões"))
+
+
+#Exemplo método Sazonal de Holt-Winters (Aditivo e Multiplicativo)
+gas <- window (gascons,start=1980)
+fit1 <- hw(gas, seasonal ="additive")
+fit2 <- hw(gas, seasonal ="multiplicative")
+autoplot(gas) +
+  autolayer(fit1, series="HW previsões aditivas", PI=FALSE)+
+  autolayer(fit2, series="HW previsões multiplicativas",PI=FALSE)+
+  ggtitle("Previsões") + xlab("Anos") +
+  ylab("Gás consumido no reino unido") +
+  guides(colour=guide_legend(title="Previsões"))
+
+
+
+
+
+
+
+
+
+
+
