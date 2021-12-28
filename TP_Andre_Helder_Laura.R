@@ -50,6 +50,9 @@ autoplot(UKgas, series="Dados", xlab="ano", ylab="Milhoes", main="Consumo de gás
   autolayer(ma, series="MM-5")
 
 
+
+
+
 ########
 autoplot(UKgas, series="dados", xlab = "Ano", ylab =, main=)+autolayer(ma(UKgas,12,centre = TRUE), series="2*12MM")
 
@@ -211,6 +214,7 @@ summary(fc)
 fc$fitted
 
 #Exemplo método de Holt amortecido damped
+gascons <- window(UKgas, start=1970)
 fc3 <- holt(gascons, damped=TRUE, h=5) #sem definir phi, é estimado
 summary(fc3)
 autoplot(gascons) +
@@ -222,16 +226,24 @@ autoplot(gascons) +
 
 
 #Exemplo método Sazonal de Holt-Winters (Aditivo e Multiplicativo)
-gas <- window (gascons,start=1980)
-fit1 <- hw(gas, seasonal ="additive")
-fit2 <- hw(gas, seasonal ="multiplicative")
-autoplot(gas) +
+gascons <- window (UKgas,start=1970)
+fit1 <- hw(gascons, seasonal ="additive")
+fit2 <- hw(gascons, seasonal ="multiplicative")
+autoplot(gascons) +
   autolayer(fit1, series="HW previsões aditivas", PI=FALSE)+
   autolayer(fit2, series="HW previsões multiplicativas",PI=FALSE)+
   ggtitle("Previsões") + xlab("Anos") +
   ylab("Gás consumido no reino unido") +
   guides(colour=guide_legend(title="Previsões"))
 
+
+#Teste de Mann-Kendall
+ind1 <-ts(c(UKgas))
+mk.test(ind1)
+
+#Teste de Mann-Whitney-Pettitt
+data(UKgas)
+pettitt.test(UKgas)
 
 
 
