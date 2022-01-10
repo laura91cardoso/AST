@@ -5,72 +5,57 @@ library(gridExtra)
 library(readxl)
 library(ggplot2)
 
+UKgas
+
 #Permite saber se se trata de uma série temporal ou não
 class(UKgas)
 
 #Representação gráfica da série temporal
-autoplot(UKgas)
-
-UKgas
 autoplot(UKgas, xlab = "Anos", ylab = "Milhões", main = "Consumo de gás no Reino Unido entre 1960 e 1986") 
 
-ggAcf(UKgas, main="Correlograma", lag=12)
+
+########################################################
+##                  Correlograma                      ##
+########################################################
+ggAcf(UKgas, main="Correlograma", lag=36, xlab="Desfasamento", ylab="correlações", main="Correlograma")
 
 ######################################################################
 ###############PROCESSOS ESTOCÁSTICOS#################################
+######################################################################
 
-#função para aplicar no teste Mann-Kendall com sazonalidade
+########################################################
+##      Teste Mann-Kendall com sazonalidade           ##
+########################################################
 
 smk.test(UKgas)
 
-#definir as hipóteses:
-# H0: Não há tendência
-# H1: Há tendência
-
-#3º Estatística de teste : z= 13.838
-#consideramos alfa= 0.05
-# valor p= 2.2e-16 < 0.05 , rejeita-se H0, logo há tendência
-# Como s= 1328 >0 , a tendência é crescente.
-
-
-#TESTE DE MANN-WHITNEY-PETTITT - MUDANÇA NA VARIÂNCIA
-
-pettitt.test() #função
+########################################################
+##           TESTE DE MANN-WHITNEY-PETTITT            ##
+########################################################
 
 pettitt.test(UKgas)
-s.res<-pettitt.test(UKgas) # variável criada s. res para guardar os valores do teste
-s.res 
 
 ########################################################################
 ####################### Médias Móveis ##################################
 
+########################################################
+##                  Médias Móveis                     ##
+########################################################
+########
 ma(UKgas, 5)
-ma<- ma(UKgas, 5)
 autoplot(UKgas, series="Dados", xlab="ano", ylab="Milhoes", main="Consumo de gás no Reino Unido entre 1960 e 1986") + 
   autolayer(ma, series="MM-5")
-
-
-
 
 
 ########
 autoplot(UKgas, series="dados", xlab = "Ano", ylab =, main=)+autolayer(ma(UKgas,12,centre = TRUE), series="2*12MM")
 
-adit<-decompose(UKgas, type="Additive")
-adit
-adit$trend  #componente da tendência obtida por mMM
-adit$seasonal #componente sazonal
-adit$random #resíduos
-adit$figure #12 indices sazonais
-autoplot(adit)
 
+##############################################################
+##Cálculo manual dos índices sazonais - decomposição Aditiva##
+##############################################################
 
-
-#########################################################
-##Cálculo manual dos índices sazonais - decomposição Aditiva
-###########################################################
-
-
+###########CALCULO DE FORMA AUTOMÁTICA###############
 adit<-decompose(UKgas, type="additive")
 adit
 adit$trend  #componente da tendência obtida por mMM
@@ -79,6 +64,8 @@ adit$random #resíduos
 adit$figure #12 indices sazonais
 autoplot(adit)
 
+
+##########CALCULO DE FORMA MANUAL###############
 #obter tendência por MM12*2
 ma<-ma(UKgas,12)
 ma
@@ -94,18 +81,18 @@ aux2<-colMeans(matrix(aux1, ncol=12,byrow = TRUE), na.rm=T) #na.rm=T ignora os N
 aux2
 
 #Modelo aditivo a soma dos indices sazonais deve ser próxima de zero
-sum(aux2)
+sum(aux2)/12
 #Fazer a correção subtraindo a cada índice a média sum(aux2)/12
 indice_adit<-aux2-sum(aux2)/12
 indice_adit
 adit$figure
 
 
-########################################################
-##Cálculo manual dos índices sazonais - decomposição multiplicativa
-#################################################
+#####################################################################
+##Cálculo manual dos índices sazonais - decomposição multiplicativa##
+#####################################################################
 
-#versão automática
+###########CALCULO DE FORMA AUTOMÁTICA###############
 mult<-decompose(UKgas, type="multiplicative")
 mult
 mult$trend  #componente da tendência obtida por mMM
@@ -114,7 +101,7 @@ mult$random #resíduos
 mult$figure #12 indices sazonais
 autoplot(mult)
 
-#versão manual
+##########CALCULO DE FORMA MANUAL###############
 #obter tendência por MM12*2
 ma<-ma(UKgas,12)
 ma
@@ -137,44 +124,76 @@ indice_mult<-aux4/aux5
 indice_mult
 mult$figure
 
-#####DEcomposiçao STL
 
-stl_UKgas_fixed_st<-stl(UKgas, t.window = 5, s.window = "periodic", robust=TRUE)
+#####################################################################
+##                         Decomposiçao STL                        ##
+#####################################################################
 #p/ que a sazonalidade seja fixa s.window=periodic
+stl_UKgas_fixed_st<-stl(UKgas, t.window = 5, s.window = "periodic", robust=TRUE)
+autoplot(stl_UKgas_fixed_st)+xlab("")+ylab("")+ggtitle("Consumo de gás no Reino Unido")
 #resíduos não estão perto de zero--a decomposição stl não será a mais adequada
-
-autoplot(stl_Ukgas_fixed_st)+xlab("")+ylab("")+ggtitle("Consumo de gás no Reino Unido")
 
 
 
 #para ser variável a sazonalidade, s.window tem que variar, passa a ser um numero,
 #tem que ser superior ao nº de trimestres observados para não excluir nenhum (4), por isso usamos 5.
-#Na ST, a sazonalidade apresenta variação por isso significa que devemos usar esta decomposição
+#Na STL, a sazonalidade apresenta variação por isso significa que devemos usar esta decomposição
 stl_UKgas_changing_st<-stl(UKgas, t.window = 5, s.window = 5, robust=TRUE)
 autoplot(stl_UKgas_changing_st)+xlab("")+ylab("")+ggtitle("Consumo de gás no Reino Unido")
 
-autoplot(UKgas, series = "dados")+
-  autolayer(trendcycle(stl_UKgas_fixed_st),
+autoplot(UKgas, series = "Dados")+
+  autolayer(trendcycle(stl_UKgas_changing_st),
             series = "Tendência")+
-  autolayer(seasadj(stl_Ukgas_fixed_st), #componente sazonal ajustada
+  autolayer(seasadj(stl_UKgas_changing_st), #componente sazonal ajustada
             series="Sazonalidade ajustada")+
   ggtitle("Consumo de gás no Reino Unido",
-          subtitle = "STL decomposição fixa") +
+          subtitle = "Decomposição STL") +
   scale_color_manual(values=c("gray", "red", "blue"),
                      breaks=c("Dados", "Tendência", "Sazonalidade ajustada"))
 
-#
-xx<- forecast(stl_UKgas_fixed_st, method="naive")
-xx1<- autoplot(xx)
 
-yy<- forecast(stl_UKgas_changing_st, method = "naive")
-yy1<- autoplot(yy)
 
-grid.arrange(xx1,yy1, nrow=2)
+########################################################
+##            Métodos simples de previsão             ##
+########################################################
+autoplot(UKgas)+
+  autolayer(meanf(UKgas, h=10), 
+            series="Média", PI=FALSE) +  #h=10 h é a previsaõ futura 
+  autolayer(naive(UKgas, h=10),
+            series="Naive", PI=FALSE)+
+  autolayer(snaive(UKgas, h=10),
+            series="Naive Sazonal", PI=FALSE)+
+  autolayer(rwf(UKgas, h=10, drift = TRUE),
+            series="Drift", PI=FALSE)+
+  ggtitle("Previsões para o consumo de gás  no Reino Unido") + 
+  xlab("Ano")+ ylab("Milhoes")+
+  guides(colour=guide_legend(title = "Previsões"))
+  
 
-#Resíduos
-res<-yy$residuals
+########################################################
+##                  Resíduos                          ##
+########################################################
+res <-residuals(snaive(UKgas))
+autoplot(res) + xlab("Ano")+ ylab("")+ ggtitle("Residuos utilizando o metodo snaive")
+gghistogram(res) + ggtitle("Histograma do Residuos")
+ggAcf(res) + ggtitle("ACF dos Resíduos")
 checkresiduals(res)
+
+
+
+checkresiduals(meanf(UKgas))
+
+checkresiduals(snaive(UKgas))
+
+checkresiduals(naive(UKgas))
+
+checkresiduals(rwf(UKgas, drift = TRUE))
+
+########################################################
+##            Intervalos de Previsão                  ##
+########################################################
+autoplot(snaive(UKgas))+ggtitle("Previsoes utilizando o método Naive Sazonal")
+
 
 #Usar dois métodos de previsao: naive e drift
 
@@ -189,31 +208,20 @@ p2<-autoplot(fit2)
 
 grid.arrange(pl, p2, nrow=2)
 
-#Previsões
-autoplot(UKgas)+autolayer(meanf(UKgas, h=11), series="Média", PI=FALSE) +  #h=11 h é a previsaõ futura 
-  autolayer(naive(UKgas, h=11), series="Naive", PI=FALSE)+
-  autolayer(snaive(UKgas, h=11), series="Naive Sazonal", PI=FALSE)+
-  ggtitle("Previsões para o consumo de gás  no Reino Unido") + 
-  xlab("Ano")+ ylab("Milhoes")+
-  guides(colour=guide_legend(title = "Previsões"))
 
-
-
-#comparar com a série original
-autoplot(UKgas)+
-  autolayer(meanf(UKgas, h=11), series="Média", PI=FALSE) +  
-  autolayer(naive(UKgas, h=11), series="Naive", PI=FALSE)+
-  autolayer(snaive(UKgas, h=11), series="Naive Sazonal", PI=FALSE)+
-  autolayer(rwf(UKgas, h=11), series="Drift", PI=FALSE)
-
-#Metodo de tendência de Holt
+########################################################
+##            Metodo de tendência de Holt             ##
+########################################################
 gascons <- window(UKgas, start=1970)
 autoplot(gascons)
 fc <- holt(gascons, h=5)#alisamento exponencial com tendência
 summary(fc)
 fc$fitted
 
-#Exemplo método de Holt amortecido damped
+
+########################################################
+##            Método de Holt amortecido damped        ##
+########################################################
 gascons <- window(UKgas, start=1970)
 fc3 <- holt(gascons, damped=TRUE, h=5) #sem definir phi, é estimado
 summary(fc3)
@@ -225,7 +233,9 @@ autoplot(gascons) +
   guides(colour=guide_legend(title="Previsões"))
 
 
-#Exemplo método Sazonal de Holt-Winters (Aditivo e Multiplicativo)
+#################################################################
+##  Método Sazonal de Holt-Winters (Aditivo e Multiplicativo)  ##
+#################################################################
 gascons <- window (UKgas,start=1970)
 fit1 <- hw(gascons, seasonal ="additive")
 fit2 <- hw(gascons, seasonal ="multiplicative")
@@ -237,13 +247,6 @@ autoplot(gascons) +
   guides(colour=guide_legend(title="Previsões"))
 
 
-#Teste de Mann-Kendall
-ind1 <-ts(c(UKgas))
-mk.test(ind1)
-
-#Teste de Mann-Whitney-Pettitt
-data(UKgas)
-pettitt.test(UKgas)
 
 
 
